@@ -41,7 +41,7 @@ public abstract class Task {
      * 
      * @param load The amount of load to generate. The exact definition is left to the {@link LoadGenerator}.
      */
-    public void iteration(LoadGenerator loadGenerator, int load) {
+    public void iteration(LoadGenerator<?> loadGenerator, int load) {
         loadGenerator.generateLoad(load);
     }
 

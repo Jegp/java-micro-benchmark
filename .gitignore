@@ -6,3 +6,4 @@ lib/
 nohup.out
 .project
 *.iml
+.settings

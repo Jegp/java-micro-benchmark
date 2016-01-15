@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import model.Task;
 import benchmark.BenchmarkPrinter;
 import benchmark.BenchmarkRunner;
+import benchmark.RandomMemoryLoadGenerator;
 import cases.ContinuousCycle;
 import cases.FastCycle;
 import cases.SlowCycle;
@@ -34,10 +35,11 @@ public class BenchmarkMain {
     }
 
     public BenchmarkMain(Task task, long runtimeInNanos, int iterations, BenchmarkPrinter printer) {
-        this.runner = new BenchmarkRunner(task, runtimeInNanos, iterations);
+        this.runner = new BenchmarkRunner(task, new RandomMemoryLoadGenerator(), runtimeInNanos, iterations);
         this.printer = printer;
 
-        long totalRuntimeInSeconds = (iterations + 1 /* Including warmup */) * TimeUnit.NANOSECONDS.toMillis(runtimeInNanos);
+        long totalRuntimeInSeconds = (iterations + 1 /* Including warmup */)
+                * TimeUnit.NANOSECONDS.toMillis(runtimeInNanos);
         String initMessage = String.format("Preparing %s benchmark for %d seconds with %d iteration(s)", task
                 .getClass().getSimpleName(), totalRuntimeInSeconds, iterations);
         printer.getStandardOutput().println(initMessage);

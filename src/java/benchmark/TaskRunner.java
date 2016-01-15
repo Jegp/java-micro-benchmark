@@ -20,15 +20,18 @@ public class TaskRunner {
 
     private final Task task;
     private final long runningTimeInNanos;
+    private final LoadGenerator<?> generator;
 
     /**
      * Creates a TaskRunner with a task that runs for a given duration in total.
      * 
      * @param task The task to iterate over many times.
+     * @param generator The {@link LoadGenerator} to create the load.
      * @param runtimeInNanos The total runtime of the task.
      */
-    public TaskRunner(Task task, long runtimeInNanos) {
+    public TaskRunner(Task task, LoadGenerator<?> generator, long runtimeInNanos) {
         this.task = task;
+        this.generator = generator;
         this.runningTimeInNanos = runtimeInNanos;
     }
 
@@ -39,7 +42,6 @@ public class TaskRunner {
      * @return A {@link Histogram} object containing the recorded runtimes.
      */
     public final TaskIteration run(int load) {
-        final LoadGenerator loadGenerator = new LoadGenerator();
         final SystemStatus statusBefore = new SystemStatus();
         final HiccupRecorder hiccupRecorder = new HiccupRecorder(true);
         final MetricRecorder deadlineRecorder = new MetricRecorder();
@@ -59,7 +61,7 @@ public class TaskRunner {
 
                 /* Run the iteration and time it */
                 deadlineStartInNanos = System.nanoTime();
-                task.iteration(loadGenerator, load);
+                task.iteration(generator, load);
                 deadlineDeltaInNanos = System.nanoTime() - deadlineStartInNanos;
 
                 /* Record the deadline */
