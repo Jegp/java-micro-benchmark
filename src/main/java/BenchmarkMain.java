@@ -118,7 +118,7 @@ public class BenchmarkMain {
         System.out.println("");
         System.out.println("Options:");
         System.out.println("\t-i iterations\tThe number of iterations to run with increasing load");
-        System.out.println("\t-t time\t\tSpecifies the runtime in seconds");
+        System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds");
         System.out.println("");
         System.out.println("Exit codes:");
         System.out.println("\t1\tNot enough parameters were given");
