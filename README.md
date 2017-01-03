@@ -106,7 +106,15 @@ Especially three factors make the results hard to transfer
 
 1. Synthetic workload. The framework simulates a piece of work which is nowhere near the
 real thing. To mediate this, implement your own ``LoadGenerator``.
-2. Benchmarking environment. 
+2. Benchmarking environment. To transfer the results we need completely homogenous
+testing and production environments. To alleviate this, run this on the same hardware and
+OS running in production.
+3. Limited parametricity. There are a multitude of factors which can influence the
+performance. The most important one is heap size, but try to encapsulate other aspects as
+well, for instance by changing the garbage collector, workload and maybe even VM. 
+
+Lastly, if you are on Unix systems I recommend running this with a low
+[nice](https://en.wikipedia.org/wiki/Nice_%28Unix%29) value.
 
 ## Benchmarking details
 
