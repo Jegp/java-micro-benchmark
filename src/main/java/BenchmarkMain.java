@@ -5,12 +5,14 @@
 import benchmark.BenchmarkPrinter;
 import benchmark.BenchmarkRunner;
 import benchmark.RandomMemoryLoadGenerator;
-import cases.ContinuousCycle;
-import cases.FastCycle;
-import cases.SlowCycle;
 import model.Task;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,6 +44,10 @@ import java.util.concurrent.TimeUnit;
  * This framework comes with three built-in use-cases: a slow cycle with a period time of 1200ms, a fast
  * cycle with a period time of 40 and a continuous cycle with a period time of 0.
  * </p>
+ * <p>
+ * The use cases are defined in the <code>cases.yml</code> file. If provided with the <code>-f</code> flag,
+ * the program can run any use case, defined in the file.
+ * </p>
  * <h3>Runtime</h3>
  * <p>To somehow control how long the benchmarking should run, the <i>runtime</i> parameter lets you define
  * how long each benchmark iteration should run.
@@ -66,8 +72,9 @@ public class BenchmarkMain {
     private static final String SLOW_CYCLE = "slow";
     private static final String CONTINUOUS_CYCLE = "continuous";
 
-    public static final long DEFAULT_RUNTIME_SECONDS = 900;
-    public static final int DEFAULT_ITERATIONS = 8;
+    private static final long DEFAULT_RUNTIME_SECONDS = 900;
+    private static final int DEFAULT_ITERATIONS = 8;
+    private static final String DEFAULT_CASES_FILE = "cases.yml";
 
     private final BenchmarkPrinter printer;
     private final BenchmarkRunner runner;
@@ -121,7 +128,8 @@ public class BenchmarkMain {
     private static BenchmarkMain parseArgs(String[] args) {
         long runtimeInSeconds = DEFAULT_RUNTIME_SECONDS;
         int iterations = DEFAULT_ITERATIONS;
-        Task task = null;
+        String casesFile = null;
+        String taskName = null;
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -130,22 +138,41 @@ public class BenchmarkMain {
                 iterations = Integer.parseInt(args[++i]);
             } else if (arg.equals("-t")) {
                 runtimeInSeconds = Integer.parseInt(args[++i]);
-            } else if (arg.equals(FAST_CYCLE)) {
-                task = new FastCycle();
-            } else if (arg.equals(SLOW_CYCLE)) {
-                task = new SlowCycle();
-            } else if (arg.equals(CONTINUOUS_CYCLE)) {
-                task = new ContinuousCycle();
+            } else if (arg.equals("-f")) {
+                casesFile = args[++i];
+            } else {
+                taskName = args[i];
             }
         }
-        if (task == null) {
-            System.out.println("Error: No task given.");
-            System.out.println("---------------------");
+        if (taskName == null) {
+            System.err.println("Error: No task given.");
+            System.err.println("---------------------");
             printHelp();
             System.exit(1);
         }
 
-        return new BenchmarkMain(task, TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations);
+        try {
+            InputStream fileStream = casesFile == null ? BenchmarkMain.class.getResourceAsStream(DEFAULT_CASES_FILE) : new FileInputStream(casesFile);
+
+            final Map<String, Task> tasks = CaseFileParser.parse(fileStream);
+            if (tasks.containsKey(taskName)) {
+                return new BenchmarkMain(tasks.get(taskName), TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations);
+            } else {
+                System.err.println(String.format("Error: No task named %s in file %s", taskName, casesFile));
+                System.err.println("Available task names: " + tasks.keySet());
+                System.err.println("---------------------");
+                printHelp();
+                System.exit(3);
+            }
+        } catch (IOException e) {
+            System.err.println("Error: Failed to parse case file");
+            e.printStackTrace(System.err);
+            System.err.println("---------------------");
+            printHelp();
+            System.exit(2);
+        }
+
+        throw new RuntimeException();
     }
 
     private static void printHelp() {
@@ -161,13 +188,16 @@ public class BenchmarkMain {
         System.out.println("Options:");
         System.out.println("\t-i iterations\tThe number of iterations to run with increasing load. Default: 8");
         System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds. Default: 900");
+        System.out.println("\t-f cases\tA path to a YAML file, which defines the use-case to run");
         System.out.println("");
         System.out.println("Exit codes:");
         System.out.println("\t1\tNot enough parameters were given");
+        System.out.println("\t2\tError parsing case YAML file");
+        System.out.println("\t3\tCould not find requested task");
         System.out.println("");
         System.out.println("About:");
         System.out.println("\tCopyright CERN (c) 2015");
-        System.out.println("\tAuthor: Jens Egholm Pedersen <jens.egholm@cern.ch>");
+        System.out.println("\tAuthor: Jens Egholm Pedersen <jensegholm@protonmail.com>");
     }
 
 }

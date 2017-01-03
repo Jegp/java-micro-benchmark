@@ -4,33 +4,37 @@
 
 package model;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import benchmark.LoadGenerator;
 import benchmark.LoadIterator;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 /**
- * A task that can run an indefinite number of iterations with varying duration (period) and deadline requirements.
+ * A task that can run an indefinite number of iterations with varying duration (period) and deadline requirements
+ * as well as an initial workload to indicate how much 'work' to do per iteration.
  *
- * <h2>Deadline</h2>
- *
- * 
  * @author jepeders
  */
-public abstract class Task {
+public class Task {
 
     public final long periodInNanos;
     public final long deadlineInNanos;
-    private final int initialWorkload;
+    public final int initialWorkload;
 
     /**
      * Creates a task with a deadline and period in the given unit.
-     * 
-     * @param deadlineInNanos The maximum time it can take to perform one {@link #iteration()}.
-     * @param periodInNanos The time interval between the beginning of iterations.
+     *
+     * @param deadlineInMs The maximum time it can take to perform one iteration.
+     * @param periodInMs   The time interval between the beginning of iterations.
      */
-    public Task(long deadlineInNanos, long periodInNanos, int initialWorkload) {
-        this.deadlineInNanos = deadlineInNanos;
-        this.periodInNanos = periodInNanos;
+    @JsonCreator
+    public Task(@JsonProperty("deadlineInMs") long deadlineInMs, @JsonProperty("periodInMs") long periodInMs,
+                @JsonProperty("initalWorkload") int initialWorkload) {
+        this.deadlineInNanos = MILLISECONDS.toNanos(deadlineInMs);
+        this.periodInNanos = MILLISECONDS.toNanos(periodInMs);
         this.initialWorkload = initialWorkload;
     }
 
@@ -39,9 +43,9 @@ public abstract class Task {
     }
 
     /**
-     * An iteration of the task that uses the {@link #loadGenerator} given in the constructor to generate an amount of
+     * An iteration of the task that uses the {@link LoadGenerator} given in the constructor to generate an amount of
      * 'load'.
-     * 
+     *
      * @param load The amount of load to generate. The exact definition is left to the {@link LoadGenerator}.
      */
     public void iteration(LoadGenerator<?> loadGenerator, int load) {
