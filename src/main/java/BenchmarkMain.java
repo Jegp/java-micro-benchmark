@@ -117,8 +117,8 @@ public class BenchmarkMain {
         System.out.println("\tBenchmark name (fast, slow, continuous) [-i iterations] [-t time]");
         System.out.println("");
         System.out.println("Options:");
-        System.out.println("\t-i iterations\tThe number of iterations to run with increasing load");
-        System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds");
+        System.out.println("\t-i iterations\tThe number of iterations to run with increasing load. Default: 8");
+        System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds. Default: 900");
         System.out.println("");
         System.out.println("Exit codes:");
         System.out.println("\t1\tNot enough parameters were given");
