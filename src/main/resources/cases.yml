@@ -11,4 +11,4 @@ fast:
 slow:
   deadlineInNanos: 700
   periodInNanos: 1200
-  initialWorkload: 1
+  initialWorkload: 1024
