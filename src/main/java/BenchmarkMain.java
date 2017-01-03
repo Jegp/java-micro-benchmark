@@ -4,13 +4,12 @@
 
 import benchmark.BenchmarkPrinter;
 import benchmark.BenchmarkRunner;
+import benchmark.LoadIterator;
 import benchmark.RandomMemoryLoadGenerator;
 import model.Task;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +43,7 @@ import java.util.concurrent.TimeUnit;
  * cycle with a period time of 40 and a continuous cycle with a period time of 0.
  * </p>
  * <p>
- * The use cases are defined in the <code>cases.yml</code> file. If provided with the <code>-f</code> flag,
+ * The use cases are defined in the <code>tasks.yml</code> file. If provided with the <code>-f</code> flag,
  * the program can run any use case, defined in the file.
  * </p>
  * <h3>Runtime</h3>
@@ -73,7 +72,7 @@ public class BenchmarkMain {
 
     private static final long DEFAULT_RUNTIME_SECONDS = 900;
     private static final int DEFAULT_ITERATIONS = 8;
-    private static final String DEFAULT_CASES_FILE = "cases.yml";
+    private static final String DEFAULT_CASES_FILE = "tasks.yml";
 
     private final BenchmarkPrinter printer;
     private final BenchmarkRunner runner;
@@ -87,10 +86,13 @@ public class BenchmarkMain {
         this.printer = printer;
 
         long totalRuntimeInSeconds = (iterations + 1 /* Including warmup */)
-                * TimeUnit.NANOSECONDS.toMillis(runtimeInNanos);
+                * TimeUnit.NANOSECONDS.toSeconds(runtimeInNanos);
         String initMessage = String.format("Preparing %s benchmark for %d seconds with %d iteration(s)", task
                 .getClass().getSimpleName(), totalRuntimeInSeconds, iterations);
+        String expectedFinish = String.format("Expected time of completion: %s",
+                java.time.LocalDateTime.now().plusSeconds(totalRuntimeInSeconds).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         printer.getStandardOutput().println(initMessage);
+        printer.getStandardOutput().println(expectedFinish);
     }
 
     public void run() {
@@ -130,21 +132,29 @@ public class BenchmarkMain {
         String casesFile = null;
         String taskName = null;
 
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
+        try {
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
 
-            if (arg.equals("-i")) {
-                iterations = Integer.parseInt(args[++i]);
-            } else if (arg.equals("-t")) {
-                runtimeInSeconds = Integer.parseInt(args[++i]);
-            } else if (arg.equals("-f")) {
-                casesFile = args[++i];
-            } else {
-                taskName = args[i];
+                if (arg.equals("-i")) {
+                    iterations = Integer.parseInt(args[++i]);
+                } else if (arg.equals("-t")) {
+                    runtimeInSeconds = Integer.parseInt(args[++i]);
+                } else if (arg.equals("-f")) {
+                    casesFile = args[++i];
+                } else {
+                    taskName = args[i];
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException e){
+            System.err.println("Error: Missing parameter");
+            System.err.println("---------------------");
+            printHelp();
+            System.exit(1);
         }
+
         if (taskName == null) {
-            System.err.println("Error: No task given.");
+            System.err.println("Error: No task given");
             System.err.println("---------------------");
             printHelp();
             System.exit(1);
@@ -169,6 +179,11 @@ public class BenchmarkMain {
             System.err.println("---------------------");
             printHelp();
             System.exit(2);
+        } catch (UnsupportedOperationException e) {
+            System.err.println("Error: " + e);
+            System.err.println("---------------------");
+            printHelp();
+            System.exit(4);
         }
 
         throw new RuntimeException();
@@ -176,16 +191,17 @@ public class BenchmarkMain {
 
     private static void printHelp() {
         System.out.println("Benchmark");
-        System.out.println("\tBenchmarks the period, deadline and response times of three use cases:");
+        System.out.println("\tBenchmarks the period, deadline and response times of a Java application.");
+        System.out.println("Usage:");
+        System.out.println("\tBenchmark name (fast, slow, continuous) [-i iterations] [-t time] [-f benchmark-cases]");
+        System.out.println("");
+        System.out.println("\tBuilt-in benchmarks:");
         System.out.println("\t  slow:       A cycle of 1.2 seconds, with a deadline of 0.7 seconds");
         System.out.println("\t  fast:       A cycle of 40 ms (25 hz)");
         System.out.println("\t  continuous: A continuous task that should get as fast response time as possible");
         System.out.println("");
-        System.out.println("Usage:");
-        System.out.println("\tBenchmark name (fast, slow, continuous) [-i iterations] [-t time]");
-        System.out.println("");
         System.out.println("Options:");
-        System.out.println("\t-i iterations\tThe number of iterations to run with increasing load. Default: 8");
+        System.out.println("\t-i iterations\tThe number of iterations to run with increasing load. Default: 8. Max value: 31");
         System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds. Default: 900");
         System.out.println("\t-f cases\tA path to a YAML file, which defines the use-case to run");
         System.out.println("");
@@ -193,6 +209,7 @@ public class BenchmarkMain {
         System.out.println("\t1\tNot enough parameters were given");
         System.out.println("\t2\tError parsing case YAML file");
         System.out.println("\t3\tCould not find requested task");
+        System.out.println("\t4\tUnsupported parameter values");
         System.out.println("");
         System.out.println("About:");
         System.out.println("\tCopyright CERN (c) 2015");

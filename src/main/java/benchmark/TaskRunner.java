@@ -42,7 +42,7 @@ public class TaskRunner {
      * @return A {@link Histogram} object containing the recorded runtimes.
      */
     public final TaskIteration run(int load) {
-        final SystemStatus statusBefore = new SystemStatus();
+        final SystemMetrics statusBefore = new SystemMetrics();
         final HiccupRecorder hiccupRecorder = new HiccupRecorder(true);
         final MetricRecorder deadlineRecorder = new MetricRecorder();
         final MetricRecorder periodRecorder = new MetricRecorder();
@@ -76,7 +76,7 @@ public class TaskRunner {
         }
 
         Histogram hiccupHistogram = hiccupRecorder.terminate();
-        SystemStatus statusAfter = new SystemStatus();
+        SystemMetrics statusAfter = new SystemMetrics();
 
         return new TaskIteration(load, statusBefore, statusAfter, deadlineRecorder.getHistogram(),
                 periodRecorder.getHistogram(), hiccupHistogram);

@@ -15,6 +15,8 @@ import java.util.NoSuchElementException;
  */
 public class LoadIterator implements Iterator<Integer> {
 
+    public static final int MAX_ITERATIONS = Integer.bitCount(Integer.MAX_VALUE);
+
     private final int baseLoad;
     private final int maxIterations;
     private int currentIteration;
@@ -51,7 +53,7 @@ public class LoadIterator implements Iterator<Integer> {
         if (Integer.numberOfLeadingZeros(base) - shift < 0) {
             throw new UnsupportedOperationException(String.format(
                     "Cannot create an iterator shifted %d times. Ceiling is %d", shift,
-                    Integer.bitCount(Integer.MAX_VALUE)));
+                    MAX_ITERATIONS));
         }
     }
 

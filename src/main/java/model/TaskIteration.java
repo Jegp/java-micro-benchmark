@@ -9,7 +9,7 @@ import java.io.PrintStream;
 import org.HdrHistogram.Histogram;
 
 import benchmark.BenchmarkPrinter;
-import benchmark.SystemStatus;
+import benchmark.SystemMetrics;
 
 /**
  * The results of one run of a {@link Task} that can be dumped to a {@link PrintStream}.
@@ -24,11 +24,11 @@ public class TaskIteration {
     private final Histogram deadlineHistogram;
     private final Histogram periodHistogram;
 
-    private final SystemStatus statusAfter;
-    private final SystemStatus statusBefore;
+    private final SystemMetrics statusAfter;
+    private final SystemMetrics statusBefore;
 
-    public TaskIteration(int load, SystemStatus statusBefore, SystemStatus statusAfter, Histogram deadlineHistogram,
-            Histogram periodHistogram, Histogram hiccupHistogram) {
+    public TaskIteration(int load, SystemMetrics statusBefore, SystemMetrics statusAfter, Histogram deadlineHistogram,
+                         Histogram periodHistogram, Histogram hiccupHistogram) {
         this.load = load;
         this.hiccupHistogram = hiccupHistogram;
         this.periodHistogram = periodHistogram;
@@ -46,7 +46,7 @@ public class TaskIteration {
 
     private void writeHeader(PrintStream output) {
         output.println(String.format("Task iteration with %d load", load));
-        output.println(statusBefore.toString(statusAfter));
+        output.println(statusBefore.compareMetrics(statusAfter));
     }
 
     private void writeHistogram(Histogram histogram, PrintStream output) {

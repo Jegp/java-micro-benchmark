@@ -35,7 +35,7 @@ public class BenchmarkRunner {
 
         while (loadIterator.hasNext()) {
             int load = loadIterator.next();
-            writer.println(String.format("Running iteration %d of %d with %d load", ++index, iterations, load));
+            writer.println(String.format("\tRunning iteration %d of %d with %d load", ++index, iterations, load));
             TaskIteration iteration = taskRunner.run(load);
             iteration.write(printer);
         }
@@ -53,7 +53,7 @@ public class BenchmarkRunner {
         taskRunner.run(0); /* Loads the classes in the run method */
         writer.println(" ... completed in " + durationInNanos + "ns\n");
 
-        writer.print("Warmup completed: " + new SystemStatus());
+        writer.print("Warmup completed: " + new SystemMetrics().getMetrics());
     }
 
 }
