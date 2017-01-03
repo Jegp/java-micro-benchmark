@@ -77,7 +77,7 @@ public class SystemMetrics implements Metrics<SystemMetrics> {
                     metrics.stream().map(metrics ->
                             String.format("\t%s:\n", metrics.name) +
                                     String.format("\t\tNumber of garbage collections:   %d\n", metrics.count) +
-                                    String.format("\t\tCollection time in milliseconds: %d\n", metrics.time))
+                                    String.format("\t\tTotal collection time in milliseconds: %d\n", metrics.time))
                             .collect(Collectors.joining());
         }
 
