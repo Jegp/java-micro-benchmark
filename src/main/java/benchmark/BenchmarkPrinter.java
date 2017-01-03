@@ -15,7 +15,7 @@ public class BenchmarkPrinter {
     public static final File DEFAULT_OUTPUT_FOLDER = new File(String.format("%1$tY%1$tm%1$td-%1$tT",
             Calendar.getInstance()));
 
-    private static final String HICCUP_OUTPUT_FORMAT = "%d_hiccup";
+    private static final String HICCUP_OUTPUT_FORMAT = "%d_response";
     private static final String DEADLINE_OUTPUT_FORMAT = "%d_deadline";
     private static final String PERIOD_OUTPUT_FORMAT = "%d_period";
     private static final String LOG_OUTPUT_NAME = "log";

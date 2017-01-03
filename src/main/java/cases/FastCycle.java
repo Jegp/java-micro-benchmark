@@ -7,6 +7,11 @@ import java.util.concurrent.TimeUnit;
 
 import model.Task;
 
+/**
+ * A faster cycle with a deadline of 10ms, a cycle time of 40ms and an initial workload of 16.
+ *
+ * @see Task
+ */
 public class FastCycle extends Task {
 
     private static final int INITIAL_WORKLOAD = 16;

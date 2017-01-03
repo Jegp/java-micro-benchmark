@@ -2,21 +2,63 @@
  * Copyright (c) 2015 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-import java.io.PrintStream;
-import java.util.concurrent.TimeUnit;
-
-import model.Task;
 import benchmark.BenchmarkPrinter;
 import benchmark.BenchmarkRunner;
 import benchmark.RandomMemoryLoadGenerator;
 import cases.ContinuousCycle;
 import cases.FastCycle;
 import cases.SlowCycle;
+import model.Task;
+
+import java.io.PrintStream;
+import java.util.concurrent.TimeUnit;
 
 /**
- * The CLI entry point for this benchmarking system.
- * 
+ * The CLI entry point for this benchmarking system. Below is a brief description of the framework. Please refer
+ * to the <code>README</code> at the page on GitHub for more information:
+ * <a href="https://github.com/Jegp/java-micro-benchmark">https://github.com/Jegp/java-micro-benchmark</a>
+ * <h2>Benchmarking</h2>
+ * <p>
+ * Performance evaluation is an art, and this benchmarking framework is simply one attempt at extracting metrics
+ * to compare certain environments to some metrics.
+ * </p>
+ * <h3>Metrics</h2>
+ * <p>
+ * This framework focuses specifically on real-time systems, which require a system to respond within a
+ * reasonable delay. In this framework that metric is called the <i>response time</i>. The framework also
+ * includes a way of measuring the total execution time for a task. In real-time systems
+ * this criterion is important because a system can be under restraints of time. In this framework we call this
+ * the <i>deadline</i>. Each task is executed with a certain delay, to illustrate that regardless of any failures
+ * in meeting the <i>deadline</i>, the next task will start at a certain time. This is refered to as the
+ * <i>period time</i>.
+ * </p>
+ * <h3>Workload</h3>
+ * <p>
+ * To put strain on the system, a {@link benchmark.LoadGenerator} generates a load. This load is defined by a
+ * positive integer and will double for each iteration.
+ * </p>
+ * <h2>Benchmarking cases</h2>
+ * <p>
+ * This framework comes with three built-in use-cases: a slow cycle with a period time of 1200ms, a fast
+ * cycle with a period time of 40 and a continuous cycle with a period time of 0.
+ * </p>
+ * <h3>Runtime</h3>
+ * <p>To somehow control how long the benchmarking should run, the <i>runtime</i> parameter lets you define
+ * how long each benchmark iteration should run.
+ * </p>
+ * <h2>Collecting data</h2>
+ * <p>
+ * The data is collected in a folder named after the benchmarking case. The folder will be created in the current
+ * directory and will contain files prefixed with the current workload. Aligned with the metrics, each iteration
+ * generates three files for the response time (response), deadline (deadline) and period time (period).
+ * </p>
+ * <p>
+ * Each file contains a High Dynamic Range (HDR) Histogram, which simply contains a histogram with the
+ * measured times in different bins.
+ * </p>
+ *
  * @author jepeders
+ * @see <a href="https://github.com/Jegp/java-micro-benchmark">https://github.com/Jegp/java-micro-benchmark</a>
  */
 public class BenchmarkMain {
 

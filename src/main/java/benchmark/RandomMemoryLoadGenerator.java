@@ -12,7 +12,7 @@ import java.util.Random;
  * A class that can generate synthetic load and whose operations are not being optimised away by compile or runtime
  * environment. The results of the class uses the {@link Random} utility with a constant seed, so the results are
  * idempotent.
- * 
+ *
  * @author jepeders
  */
 public class RandomMemoryLoadGenerator implements LoadGenerator<Object> {
@@ -27,9 +27,9 @@ public class RandomMemoryLoadGenerator implements LoadGenerator<Object> {
 
     /**
      * Generates a load by storing memory
-     * 
+     *
      * @param load The amount of times the load generator should iterate the same task.
-     * @return
+     * @return A {@link List} of objects to prevent the data from being optimized away at compile-time.
      * @throws IllegalArgumentException if the load is larger than 262144 (1 << 18)
      */
     @Override
@@ -77,7 +77,7 @@ public class RandomMemoryLoadGenerator implements LoadGenerator<Object> {
 
     /**
      * Generates a single custom object containing an array of the given size filled with random data.
-     * 
+     *
      * @param size The size of the array to create.
      * @return An {@link Object} containing an array.
      */

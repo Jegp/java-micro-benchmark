@@ -8,6 +8,11 @@ import model.Task;
  * Copyright (c) 2015 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
+/**
+ * A slow cycle with a deadline of 700ms, a cycle time of 1200ms and an initial workload of 1024.
+ *
+ * @see Task
+ */
 public class SlowCycle extends Task {
 
     private static final int INITIAL_WORKLOAD = 1024;

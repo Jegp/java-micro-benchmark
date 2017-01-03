@@ -9,7 +9,10 @@ import benchmark.LoadGenerator;
 import benchmark.LoadIterator;
 
 /**
- * A task that can run an indefinite number of iterations.
+ * A task that can run an indefinite number of iterations with varying duration (period) and deadline requirements.
+ *
+ * <h2>Deadline</h2>
+ *
  * 
  * @author jepeders
  */

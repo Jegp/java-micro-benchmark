@@ -10,10 +10,10 @@ import model.TaskIteration;
 import org.HdrHistogram.Histogram;
 
 /**
- * A class that can run a task and record the time of each run in a {@link Statistics} object. This runner will also
+ * A class that can run a task and record the time of each run in a {@link Histogram} object. This runner will also
  * 'warm up' the VM to make sure that all JIT and other run-time optimisations have been performed <i>before</i> the
  * actual benchmarking.
- * 
+ *
  * @author jepeders
  */
 public class TaskRunner {
@@ -24,9 +24,9 @@ public class TaskRunner {
 
     /**
      * Creates a TaskRunner with a task that runs for a given duration in total.
-     * 
-     * @param task The task to iterate over many times.
-     * @param generator The {@link LoadGenerator} to create the load.
+     *
+     * @param task           The task to iterate over many times.
+     * @param generator      The {@link LoadGenerator} to create the load.
      * @param runtimeInNanos The total runtime of the task.
      */
     public TaskRunner(Task task, LoadGenerator<?> generator, long runtimeInNanos) {
@@ -37,7 +37,7 @@ public class TaskRunner {
 
     /**
      * Runs the task in the given runtime with a given load.
-     * 
+     *
      * @param load The amount of load (stress) to generate
      * @return A {@link Histogram} object containing the recorded runtimes.
      */
