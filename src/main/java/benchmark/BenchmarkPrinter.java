@@ -23,8 +23,8 @@ public class BenchmarkPrinter {
     private final File folder;
     private final PrintStream logPrinter;
 
-    public BenchmarkPrinter(String prefix) {
-        this(new File(prefix + DEFAULT_OUTPUT_FOLDER));
+    public BenchmarkPrinter(String postfix) {
+        this(new File(DEFAULT_OUTPUT_FOLDER + postfix));
     }
 
     public BenchmarkPrinter(File parentFolder) {

@@ -11,7 +11,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -79,8 +78,8 @@ public class BenchmarkMain {
     private final BenchmarkPrinter printer;
     private final BenchmarkRunner runner;
 
-    public BenchmarkMain(Task task, long runtimeInNanos, int iterations) {
-        this(task, runtimeInNanos, iterations, new BenchmarkPrinter(task.getClass().getSimpleName()));
+    public BenchmarkMain(Task task, long runtimeInNanos, int iterations, String taskName) {
+        this(task, runtimeInNanos, iterations, new BenchmarkPrinter("_" + taskName));
     }
 
     public BenchmarkMain(Task task, long runtimeInNanos, int iterations, BenchmarkPrinter printer) {
@@ -156,7 +155,7 @@ public class BenchmarkMain {
 
             final Map<String, Task> tasks = CaseFileParser.parse(fileStream);
             if (tasks.containsKey(taskName)) {
-                return new BenchmarkMain(tasks.get(taskName), TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations);
+                return new BenchmarkMain(tasks.get(taskName), TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations, taskName);
             } else {
                 System.err.println(String.format("Error: No task named %s in file %s", taskName, casesFile));
                 System.err.println("Available task names: " + tasks.keySet());
