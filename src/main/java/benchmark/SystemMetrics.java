@@ -6,8 +6,8 @@ package benchmark;
 
 import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SystemMetrics implements Metrics<SystemMetrics> {
 
@@ -65,20 +65,27 @@ public class SystemMetrics implements Metrics<SystemMetrics> {
         }
 
         static GcMetrics create() {
-            return new GcMetrics(ManagementFactory.getGarbageCollectorMXBeans().stream().map(bean ->
-                    new MemoryManagerMetrics(bean.getObjectName().getCanonicalName(),
-                            Math.max(0, bean.getCollectionCount()),
-                            Math.max(0, bean.getCollectionTime()))).collect(Collectors.toList()));
+            final List<GcMetrics.MemoryManagerMetrics> metrics = new ArrayList<MemoryManagerMetrics>();
+            for (java.lang.management.GarbageCollectorMXBean bean : ManagementFactory.getGarbageCollectorMXBeans()) {
+                metrics.add(
+                        new MemoryManagerMetrics(bean.getName(),
+                                Math.max(0, bean.getCollectionCount()),
+                                Math.max(0, bean.getCollectionTime())));
+            }
+
+            return new GcMetrics(metrics);
         }
 
         @Override
         public String getMetrics() {
-            return "Garbage collector statistics:\n" +
-                    metrics.stream().map(metrics ->
-                            String.format("\t%s:\n", metrics.name) +
-                                    String.format("\t\tNumber of garbage collections:   %d\n", metrics.count) +
-                                    String.format("\t\tTotal collection time in milliseconds: %d\n", metrics.time))
-                            .collect(Collectors.joining());
+            final StringBuilder builder = new StringBuilder();
+            for (GcMetrics.MemoryManagerMetrics metrics : metrics) {
+                builder.append(String.format("\t%s:\n", metrics.name));
+                builder.append(String.format("\t\tNumber of garbage collections:   %d\n", metrics.count));
+                builder.append(String.format("\t\tTotal collection time in milliseconds: %d\n", metrics.time));
+            }
+
+            return "Garbage collector statistics:\n" + builder.toString();
         }
 
         @Override
