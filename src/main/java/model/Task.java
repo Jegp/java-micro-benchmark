@@ -31,10 +31,10 @@ public class Task {
      * @param periodInMs   The time interval between the beginning of iterations.
      */
     @JsonCreator
-    public Task(@JsonProperty("deadlineInMs") long deadlineInMs, @JsonProperty("periodInMs") long periodInMs,
+    public Task(@JsonProperty("deadlineInNanos") long deadlineInNanos, @JsonProperty("periodInNanos") long periodInNanos,
                 @JsonProperty("initalWorkload") int initialWorkload) {
-        this.deadlineInNanos = MILLISECONDS.toNanos(deadlineInMs);
-        this.periodInNanos = MILLISECONDS.toNanos(periodInMs);
+        this.deadlineInNanos = deadlineInNanos;
+        this.periodInNanos = periodInNanos;
         this.initialWorkload = initialWorkload;
     }
 
