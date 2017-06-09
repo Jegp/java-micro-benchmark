@@ -27,8 +27,8 @@ public class Task {
     /**
      * Creates a task with a deadline and period in the given unit.
      *
-     * @param deadlineInMs The maximum time it can take to perform one iteration.
-     * @param periodInMs   The time interval between the beginning of iterations.
+     * @param deadlineInNanos The maximum time it can take to perform one iteration.
+     * @param periodInNanos   The time interval between the beginning of iterations.
      */
     @JsonCreator
     public Task(@JsonProperty("deadlineInNanos") long deadlineInNanos, @JsonProperty("periodInNanos") long periodInNanos,
