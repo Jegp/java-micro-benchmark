@@ -91,11 +91,22 @@ tasks, I've included three benchmarking tasks:
 | --------------- | ----------- | -------- | ---------------- |
 | Slow            | 1200ms      | 1700ms   | 1024             |
 | Fast            | 40ms        | 10ms     | 16               |
-| Continuous      | 0ms         | 0ms      | 1                |
+| Continuous      | 1ms         | 0ms      | 1                |
 
 The tasks are defined in the ``tasks.yml`` file which can be found in
 ``src/main/java/resources/tasks.yml``. By using the ``-f`` flag you can point to your own
 [YAML](http://yaml.org/) file.
+
+## Specifying the class
+You can choose the action you want the benchmark do to evaluate the performances. 
+For this you need to have a class with this signature :
+``void generateLoad(int load)``
+Then your class has to be in a fatJar (i.e. a Jar containing all the dependencies that 
+need the class to be executed). Your jar must be in the repository ``external_dependencies``.
+When it is done just compile (``gradle jar``) and run the benchmark with this additional option:
+``-cl package.ClassName``
+Do not forget to add all package names. If no class is specified, the original class will be used. 
+Choosing the class to test can help you to test some specific parts of a program needing real time performances. 
 
 ## Validity
 The results of this framework should not be expected to be transferred to a life-size

@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import java.lang.reflect.Method;
+
 /**
  * A task that can run an indefinite number of iterations with varying duration (period) and deadline requirements
  * as well as an initial workload to indicate how much 'work' to do per iteration.
@@ -31,10 +33,10 @@ public class Task {
      * @param periodInNanos   The time interval between the beginning of iterations.
      */
     @JsonCreator
-    public Task(@JsonProperty("deadlineInNanos") long deadlineInNanos, @JsonProperty("periodInNanos") long periodInNanos,
+    public Task(@JsonProperty("deadlineInMs") long deadlineInMs, @JsonProperty("periodInMs") long periodInMs,
                 @JsonProperty("initalWorkload") int initialWorkload) {
-        this.deadlineInNanos = deadlineInNanos;
-        this.periodInNanos = periodInNanos;
+        this.deadlineInNanos = MILLISECONDS.toNanos(deadlineInMs);
+        this.periodInNanos = MILLISECONDS.toNanos(periodInMs);
         this.initialWorkload = initialWorkload;
     }
 
@@ -48,8 +50,19 @@ public class Task {
      *
      * @param load The amount of load to generate. The exact definition is left to the {@link LoadGenerator}.
      */
-    public void iteration(LoadGenerator<?> loadGenerator, int load) {
-        loadGenerator.generateLoad(load);
+    public void iteration(Class<?> classToTest, Object objectForTest, int load) {
+        
+        try {
+            Class<?> CArg = int.class;
+            Method ActionToTest = classToTest.getMethod("generateLoad", CArg);
+            ActionToTest.invoke(objectForTest, load);
+            
+        }
+        catch(Exception e) {
+            e.printStackTrace(System.err);
+            System.err.println("---------------------");
+        }
+        
     }
 
     @Override
