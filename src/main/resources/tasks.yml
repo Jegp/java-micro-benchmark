@@ -1,14 +1,14 @@
 continuous:
   deadlineInNanos: 0
-  periodInNanos: 0
+  periodInNanos: 1000000
   initialWorkload: 1
 
 fast:
-  deadlineInNanos: 10
-  periodInNanos: 40
+  deadlineInNanos: 10000000
+  periodInNanos: 40000000
   initialWorkload: 16
 
 slow:
-  deadlineInNanos: 700
-  periodInNanos: 1200
+  deadlineInNanos: 700000000
+  periodInNanos: 1200000000
   initialWorkload: 1024

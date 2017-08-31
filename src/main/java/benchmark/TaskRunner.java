@@ -20,7 +20,8 @@ public class TaskRunner {
 
     private final Task task;
     private final long runningTimeInNanos;
-    private final LoadGenerator<?> generator;
+    private Class<?> classToTest ;
+    private Object objectForTest;
 
     /**
      * Creates a TaskRunner with a task that runs for a given duration in total.
@@ -29,10 +30,12 @@ public class TaskRunner {
      * @param generator      The {@link LoadGenerator} to create the load.
      * @param runtimeInNanos The total runtime of the task.
      */
-    public TaskRunner(Task task, LoadGenerator<?> generator, long runtimeInNanos) {
+    public TaskRunner(Task task, Class<?> classTotest, Object objectToTest, long runtimeInNanos) {
         this.task = task;
-        this.generator = generator;
         this.runningTimeInNanos = runtimeInNanos;
+        this.objectForTest = objectToTest;
+        this.classToTest = classTotest;
+        
     }
 
     /**
@@ -55,13 +58,15 @@ public class TaskRunner {
 
         hiccupRecorder.start();
 
+        
         while (System.nanoTime() < stopTimeInNanos) {
+            
             iterationStopTimeInNanos = System.nanoTime() + task.periodInNanos;
             while (System.nanoTime() < iterationStopTimeInNanos) {
 
                 /* Run the iteration and time it */
                 deadlineStartInNanos = System.nanoTime();
-                task.iteration(generator, load);
+                task.iteration(classToTest, objectForTest, load);
                 deadlineDeltaInNanos = System.nanoTime() - deadlineStartInNanos;
 
                 /* Record the deadline */
@@ -73,6 +78,7 @@ public class TaskRunner {
                 }
                 lastPeriodStartTime = deadlineStartInNanos;
             }
+            
         }
 
         Histogram hiccupHistogram = hiccupRecorder.terminate();
@@ -94,5 +100,6 @@ public class TaskRunner {
         run(load);
         final long endTimeNanos = System.nanoTime();
         return endTimeNanos - startTimeInNanos;
+        
     }
 }

@@ -21,9 +21,23 @@ public class BenchmarkRunner {
     private final LoadIterator loadIteratorPrototype;
     private final int iterations;
 
-    public BenchmarkRunner(Task task, LoadGenerator<?> generator, long runtimeInNanos, int loadIterations) {
+    public BenchmarkRunner(Task task, String classTestName, long runtimeInNanos, int loadIterations) {
         this.runtimeInNanos = runtimeInNanos;
-        this.taskRunner = new TaskRunner(task, generator, runtimeInNanos);
+        Class<?> classToTest;
+        Object objectForTest;
+        try {
+            classToTest = Class.forName(classTestName);
+            objectForTest = classToTest.newInstance();
+            
+            
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            objectForTest = new RandomMemoryLoadGenerator();
+            classToTest = objectForTest.getClass();
+        }
+
+        this.taskRunner = new TaskRunner(task, classToTest, objectForTest, runtimeInNanos);
         this.iterations = loadIterations;
         this.loadIteratorPrototype = task.getLoadIterator(loadIterations);
     }
@@ -32,7 +46,6 @@ public class BenchmarkRunner {
         PrintStream writer = printer.getStandardOutput();
         int index = 0;
         LoadIterator loadIterator = loadIteratorPrototype.copy();
-
         while (loadIterator.hasNext()) {
             int load = loadIterator.next();
             writer.println(String.format("\tRunning iteration %d of %d with %d load", ++index, iterations, load));
@@ -57,3 +70,4 @@ public class BenchmarkRunner {
     }
 
 }
+

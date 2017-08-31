@@ -74,23 +74,27 @@ public class BenchmarkMain {
     private static final int DEFAULT_ITERATIONS = 8;
     private static final String DEFAULT_CASES_FILE = "tasks.yml";
 
+    private static final String DEFAULT_CLASS_TEST = "benchmark.RandomMemoryLoadGenerator";
+
     private final BenchmarkPrinter printer;
     private final BenchmarkRunner runner;
 
-    public BenchmarkMain(Task task, long runtimeInNanos, int iterations, String taskName) {
-        this(task, runtimeInNanos, iterations, new BenchmarkPrinter("_" + taskName));
+    public BenchmarkMain(Task task, long runtimeInNanos, int iterations, String taskName, String classTestName,
+            String uniqueClassName) {
+        this(task, runtimeInNanos, iterations, new BenchmarkPrinter(uniqueClassName + "_" + taskName), classTestName);
     }
 
-    public BenchmarkMain(Task task, long runtimeInNanos, int iterations, BenchmarkPrinter printer) {
-        this.runner = new BenchmarkRunner(task, new RandomMemoryLoadGenerator(), runtimeInNanos, iterations);
+    public BenchmarkMain(Task task, long runtimeInNanos, int iterations, BenchmarkPrinter printer,
+            String classTestName) {
+        this.runner = new BenchmarkRunner(task, classTestName, runtimeInNanos, iterations);
         this.printer = printer;
 
         long totalRuntimeInSeconds = (iterations + 1 /* Including warmup */)
                 * TimeUnit.NANOSECONDS.toSeconds(runtimeInNanos);
-        String initMessage = String.format("Preparing %s benchmark for %d seconds with %d iteration(s)", task
-                .getClass().getSimpleName(), totalRuntimeInSeconds, iterations);
-        String expectedFinish = String.format("Expected time of completion: %s",
-                java.time.LocalDateTime.now().plusSeconds(totalRuntimeInSeconds).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        String initMessage = String.format("Preparing %s benchmark for %d seconds with %d iteration(s)",
+                task.getClass().getSimpleName(), totalRuntimeInSeconds, iterations);
+        String expectedFinish = String.format("Expected time of completion: %s", java.time.LocalDateTime.now()
+                .plusSeconds(totalRuntimeInSeconds).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         printer.getStandardOutput().println(initMessage);
         printer.getStandardOutput().println(expectedFinish);
     }
@@ -129,6 +133,7 @@ public class BenchmarkMain {
     private static BenchmarkMain parseArgs(String[] args) {
         long runtimeInSeconds = DEFAULT_RUNTIME_SECONDS;
         int iterations = DEFAULT_ITERATIONS;
+        String classTestName = DEFAULT_CLASS_TEST;
         String casesFile = null;
         String taskName = null;
 
@@ -138,6 +143,23 @@ public class BenchmarkMain {
 
                 if (arg.equals("-i")) {
                     iterations = Integer.parseInt(args[++i]);
+                } else if (arg.equals("-cl")) {
+
+                    try {
+
+                        classTestName = args[++i];
+
+                        /** Verification that the class is working */
+                        Class<?> classToTest = Class.forName(classTestName);
+                        Object objectToTest = classToTest.newInstance();
+
+                    } catch (Exception e) {
+                        System.err.println("Error: Failed to load giving class ");
+                        e.printStackTrace(System.err);
+                        System.err.println("---------------------");
+
+                    }
+
                 } else if (arg.equals("-t")) {
                     runtimeInSeconds = Integer.parseInt(args[++i]);
                 } else if (arg.equals("-f")) {
@@ -146,7 +168,7 @@ public class BenchmarkMain {
                     taskName = args[i];
                 }
             }
-        } catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             System.err.println("Error: Missing parameter");
             System.err.println("---------------------");
             printHelp();
@@ -161,11 +183,14 @@ public class BenchmarkMain {
         }
 
         try {
-            InputStream fileStream = casesFile == null ? BenchmarkMain.class.getResourceAsStream(DEFAULT_CASES_FILE) : new FileInputStream(casesFile);
+            InputStream fileStream = casesFile == null ? BenchmarkMain.class.getResourceAsStream(DEFAULT_CASES_FILE)
+                    : new FileInputStream(casesFile);
 
             final Map<String, Task> tasks = CaseFileParser.parse(fileStream);
             if (tasks.containsKey(taskName)) {
-                return new BenchmarkMain(tasks.get(taskName), TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations, taskName);
+                String uniqueClassName = classTestName.split("[.]")[1];
+                return new BenchmarkMain(tasks.get(taskName), TimeUnit.SECONDS.toNanos(runtimeInSeconds), iterations,
+                        taskName, classTestName, uniqueClassName);
             } else {
                 System.err.println(String.format("Error: No task named %s in file %s", taskName, casesFile));
                 System.err.println("Available task names: " + tasks.keySet());
@@ -190,10 +215,11 @@ public class BenchmarkMain {
     }
 
     private static void printHelp() {
+
         System.out.println("Benchmark");
         System.out.println("\tBenchmarks the period, deadline and response times of a Java application.");
         System.out.println("Usage:");
-        System.out.println("\tBenchmark name (fast, slow, continuous) [-i iterations] [-t time] [-f benchmark-cases]");
+        System.out.println("\tBenchmark name (fast, slow, continuous) [-i iterations] [-t time] [-cl package.ClassToTest] [-f benchmark-cases]");
         System.out.println("");
         System.out.println("\tBuilt-in benchmarks:");
         System.out.println("\t  slow:       A cycle of 1.2 seconds, with a deadline of 0.7 seconds");
@@ -201,8 +227,10 @@ public class BenchmarkMain {
         System.out.println("\t  continuous: A continuous task that should get as fast response time as possible");
         System.out.println("");
         System.out.println("Options:");
-        System.out.println("\t-i iterations\tThe number of iterations to run with increasing load. Default: 8. Max value: 31");
+        System.out.println(
+                "\t-i iterations\tThe number of iterations to run with increasing load. Default: 8. Max value: 31");
         System.out.println("\t-t time\t\tSpecifies the runtime per iteration in seconds. Default: 900");
+        System.out.println("\t-cl class\tA path to the class you want to run the benchmark on");
         System.out.println("\t-f cases\tA path to a YAML file, which defines the use-case to run");
         System.out.println("");
         System.out.println("Exit codes:");
@@ -217,3 +245,4 @@ public class BenchmarkMain {
     }
 
 }
+
